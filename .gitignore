@@ -1,0 +1,7 @@
+## Cancelamos el seguimiento de los archivos de R
+.Rrpoj.user/
+.Rproj.user
+.Rhistory
+
+## Dejamos de seguir la carpeta data
+/data
