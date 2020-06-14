@@ -1,8 +1,35 @@
-# -*- coding: utf-8 -*-
+---
+title: "Descriptivo General. Cuestionario Complementario"
+author: "Alfonso, M. A."
+date: "13 de junio de 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      engine.path = list(
+                          python = '/usr/bin/python3'
+                          )
+)
+```
+
+```{python}
+#!/usr/bin/env python
+# coding: utf-8
+
+import os
+os.chdir('../../')
+#os.chdir('./aprender_cife')
+os.getcwd()
+
+
+# In[115]:
+
 import pandas as pd
 import matplotlib.pyplot as plt
 from funciones.abrir_bases import cod_sec_2017
 import numpy as np
+
 
 df = pd.read_csv('./data/aprender2017-secundaria-12.csv', sep='\t', encoding='iso-8859-3', na_values=' ', dtype='object')
 
@@ -16,17 +43,12 @@ df['indicator'] = 1
 cod = cod_sec_2017()
 cols = df.columns
 
+
+# Definimos algunas funciones para analizar los datos y graficar.
+
 #%% Funciones
 def categorizar_var(var, df=df.copy(), cod=cod):
-    '''Categoriza la variable. Convierte el string en CategoricalDtype. Devuelve las categorías y un diccionario con las equivalencias
-    Args:
-        var: String. Nombre de la variable a categorizar
-        df: Pandas DataFrame con los datos
-        cod: Pandas DataFrame del codebook
-    
-    Returns:
-        Pandas Series con los nombres como valores y los códigos como índice.
-    '''
+    '''Categoriza la variable. Convierte el string en CategoricalDtype. Devuelve las categorías y un diccionario con las equivalencias'''
     df[var] = df[var].astype(str)
     
     def cambiar_cat(s):
@@ -73,10 +95,8 @@ def tabla_pond(var, df=df, rel=True):
 
 def tabla(var, df=df, rel=True):
     '''Toma una lista de nombres de variables y devuelve una tabla de frecuencias.
-    Args:
-        list of strings
-    Result:
-        True - False. Define si se calculan las frecuencias relativas o absolutas.
+    var: list of strings
+    rel: True - False. Define si se calculan las frecuencias relativas o absolutas.
     '''
     
     tabla = df[var].apply(lambda x: df.groupby(x)['indicator'].sum())
@@ -126,8 +146,8 @@ def barras(t, ax):
     ax.spines['right'].set_visible(False)
     ax.spines['top'].set_visible(False)
     
-    plt.tight_layout()
-    plt.show()
+    #plt.tight_layout()
+    #plt.show()
 
 def col_cat(t):
     '''Construye una paletta de colores para graficar las tablas.
@@ -135,7 +155,10 @@ def col_cat(t):
     
     # Values
     Devuelve un DataFrame con un color para cada fila.'''
+    import numpy as np
+    import matplotlib.pyplot as plt
     from matplotlib import cm
+    from matplotlib.colors import ListedColormap, LinearSegmentedColormap
     
     colnames, valnames = etiquetas(t)
     
@@ -144,7 +167,7 @@ def col_cat(t):
     
     ## Evaluamos la cantidad de categorías por color
     n_cat = (~i).sum()
-    #n_grey = i.sum()
+    n_grey = i.sum()
     
     ## Seleccionamos los colores de las categorías color
     cat = cm.get_cmap('tab10', 10)
@@ -160,13 +183,12 @@ def col_cat(t):
 
 def col_div(t):
     '''Construye una paleta divergente de colores para graficar las tablas.
-    Args:    
-        t: tabla
+    t: tabla
     
-    Return:
-        Devuelve un DataFrame con un color para cada fila.'''
+    # Values
+    Devuelve un DataFrame con un color para cada fila.'''
     from matplotlib import cm
-    #from matplotlib.colors import ListedColormap, LinearSegmentedColormap
+    from matplotlib.colors import ListedColormap, LinearSegmentedColormap
     
     colnames, valnames = etiquetas(t)
     
@@ -175,7 +197,7 @@ def col_div(t):
     
     ## Evaluamos la cantidad de categorías por color
     n_cat = (~i).sum()
-    #n_grey = i.sum()
+    n_grey = i.sum()
     
     ## Seleccionamos los colores de las categorías color
     cat = cm.get_cmap('RdBu', 30)
@@ -197,7 +219,7 @@ def barras_apiladas(t, ax, parse_labels=True):
     
     if parse_labels:    
         ## Utilizamos expresiones regulares para separar el título de las etiquetas
-        exp = re.compile('(?P<title>.*[…?])(?P<label>.*)')
+        exp = re.compile('(?P<title>.*)[…?](?P<label>.*)')
         colnames = colnames.str.extract(exp)
     else:
         colnames = pd.DataFrame(colnames, columns=['label'])
@@ -218,62 +240,94 @@ def barras_apiladas(t, ax, parse_labels=True):
               xlabel='Proporción de estudiantes',
               xlim=(0,1))
     
-#    ax.legend(valnames['Etiqueta.1'])
+    ax.legend(valnames['Etiqueta.1'])
     # Hide the right and top spines
     ax.spines['right'].set_visible(False)
     ax.spines['top'].set_visible(False)
     
     # Put a legend below current axis
     ax.legend(valnames['Etiqueta.1'], loc='upper center', bbox_to_anchor=(0.5, -0.05),
-          fancybox=True, shadow=False, ncol=len(valnames['Etiqueta.1']))
+          fancybox=True, shadow=True, ncol=len(valnames['Etiqueta.1']))
     
-    plt.tight_layout()
-    plt.show()
-#%% Algunos ejemplos
-t = tabla(['ap3a'])
+    #plt.tight_layout()
+    #plt.show()
+
+
+# ## Total de casos
+
+
+df.info()
+
+
+# In[119]:
+
+
+df.ponder.size
+
+
+
+## Total de nan para cuestionario complementario
+df.ponder.isna().sum()
+
+
+# ## Categorizamos las variables
+l = from_to('ap1','ambito')
+df[l] = categorizar_var(l)
+
+
+# ## Graficamos
+
+t = tabla_pond(['ap1'])
 fig, ax = plt.subplots(figsize=(10,6))
-barras(t, ax)    
+barras(t, ax)  
+
+
+# In[123]:
+
+
+t = tabla_pond(['ap2'])
+fig, ax = plt.subplots(figsize=(10,6))
+barras(t, ax) 
+
+
+# In[124]:
+
 
 l = from_to('ap3a', 'ap3c')
-fig, axs = plt.subplots(3,1, sharex=True, figsize=(10,8))
-for i in range(len(l)):
-    barras(tabla_pond([l[i]]), axs[i])
-#%% 
-l = from_to('ap35a', 'ap35j')
 
-l = l[::-1]
+fig, axs = plt.subplots(3,1, sharex=True, figsize=(10,10))
 
-t=tabla_pond(l)
-fig, ax = plt.subplots(figsize=(10,6))
-barras_apiladas(t, ax)
-
-
-l = from_to('ap37a', 'ap37h')
-l = l[::-1]
-t=tabla_pond(l)
-fig, ax = plt.subplots(figsize=(10,6))
-barras_apiladas(t, ax)
-
-
-l = from_to('ap38', 'ap40')
-fig, axs = plt.subplots(3,1, sharex=True, figsize=(10,8))
 for i in range(len(l)):
     barras(tabla_pond([l[i]]), axs[i])
 
-l = ['ap41', 'ap43']
-fig, axs = plt.subplots(len(l),1, sharex=True, figsize=(10,8))
-for i in range(len(l)):
-    barras(tabla_pond([l[i]]), axs[i])
-    
-  
-l = from_to('ap44a', 'ap44f')
+
+# In[125]:
+
+
+t = tabla_pond(['ap4'])
+fig, ax = plt.subplots(figsize=(10,6))
+barras(t, ax) 
+
+
+# In[126]:
+
+
+l = from_to('ap5a', 'ap5h')
 l = l[::-1]
 t=tabla_pond(l)
-fig, ax = plt.subplots(figsize=(10,6))
+fig, ax = plt.subplots(figsize=(14,10))
 barras_apiladas(t, ax)
-    
+
+
+# In[127]:
+
+
+t = tabla_pond(['ap6'])
 fig, ax = plt.subplots(figsize=(10,6))
-barras(tabla_pond(l),ax)
+barras(t, ax) 
+
+
+# In[128]:
 
 
 l = from_to('ap7a', 'ap7d')
@@ -282,18 +336,341 @@ t=tabla_pond(l)
 fig, ax = plt.subplots(figsize=(10,6))
 barras_apiladas(t, ax, parse_labels=False) 
 
+
+# In[129]:
+
+
+l = from_to('ap8a', 'ap8g')
+l = l[::-1]
+t=tabla_pond(l)
+fig, ax = plt.subplots(figsize=(10,6))
+barras_apiladas(t, ax)
+
+
+# In[130]:
+
+
+t = tabla_pond(['ap9'])
+fig, ax = plt.subplots(figsize=(10,6))
+barras(t, ax) 
+
+
+# In[131]:
+
+
+l = from_to('ap10', 'ap11')
+
+fig, axs = plt.subplots(len(l),1, sharex=True, figsize=(10,8))
+
+for i in range(len(l)):
+    barras(tabla_pond([l[i]]), axs[i])
+
+
+# In[132]:
+
+
+t = tabla_pond(['ap12'])
+fig, ax = plt.subplots(figsize=(10,6))
+barras(t, ax) 
+
+
+# In[133]:
+
+
+t = tabla_pond(['ap13'])
+fig, ax = plt.subplots(figsize=(10,6))
+barras(t, ax) 
+
+
+# In[134]:
+
+
+t = tabla_pond(['ap14'])
+fig, ax = plt.subplots(figsize=(10,6))
+barras(t, ax) 
+
+
+# In[135]:
+
+
+l = from_to('ap15a', 'ap15c')
+l = l[::-1]
+t=tabla_pond(l)
+fig, ax = plt.subplots(figsize=(10,6))
+barras_apiladas(t, ax)
+
+
+# In[136]:
+
+
+l = from_to('ap16', 'ap17')
+
+fig, axs = plt.subplots(len(l),1, sharex=True, figsize=(10,8))
+
+for i in range(len(l)):
+    barras(tabla_pond([l[i]]), axs[i])
+
+
+# In[139]:
+
+
 ## De los que trabajan afuera de la casa?, les pagan?
 t = tabla_pond(['ap18'], df=df[df['ap17'] == '1'])
 fig, ax = plt.subplots(figsize=(10,6))
 barras(t, ax) 
 
-l = from_to('ap46a', 'ap46c')
+
+# In[140]:
+
+
+t = tabla_pond(['ap19'])
+fig, ax = plt.subplots(figsize=(10,6))
+barras(t, ax) 
+
+
+# In[141]:
+
+
+l = from_to('ap20', 'ap21')
+
+fig, axs = plt.subplots(len(l),1, sharex=True, figsize=(10,8))
+
+for i in range(len(l)):
+    barras(tabla_pond([l[i]]), axs[i])
+
+
+# In[142]:
+
+
+t = tabla_pond(['ap22'])
+fig, ax = plt.subplots(figsize=(10,6))
+barras(t, ax) 
+
+
+# In[143]:
+
+
+t = tabla_pond(['ap23'])
+fig, ax = plt.subplots(figsize=(10,6))
+barras(t, ax) 
+
+
+# In[144]:
+
+
+t = tabla_pond(['ap24'])
+fig, ax = plt.subplots(figsize=(10,6))
+barras(t, ax) 
+
+
+# In[145]:
+
+
+t = tabla_pond(['ap25'])
+fig, ax = plt.subplots(figsize=(10,6))
+barras(t, ax) 
+
+
+# In[146]:
+
+
+l = from_to('ap26a', 'ap26h')
 l = l[::-1]
 t=tabla_pond(l)
 fig, ax = plt.subplots(figsize=(10,6))
-barras_apiladas(t, ax, parse_labels=False)
+barras_apiladas(t, ax)
 
-#%%
+
+# In[147]:
+
+
+t = tabla_pond(['ap27'])
+fig, ax = plt.subplots(figsize=(10,6))
+barras(t, ax) 
+
+
+# In[148]:
+
+
+t = tabla_pond(['ap28'])
+fig, ax = plt.subplots(figsize=(10,6))
+barras(t, ax) 
+
+
+# In[149]:
+
+
+t = tabla_pond(['ap29'])
+fig, ax = plt.subplots(figsize=(10,6))
+barras(t, ax) 
+
+
+# In[150]:
+
+
+l = from_to('ap30a', 'ap30h')
+l = l[::-1]
+t=tabla_pond(l)
+fig, ax = plt.subplots(figsize=(10,6))
+barras_apiladas(t, ax)
+
+
+# In[151]:
+
+
+l = from_to('ap31a', 'ap31c')
+l = l[::-1]
+t=tabla_pond(l)
+fig, ax = plt.subplots(figsize=(10,6))
+barras_apiladas(t, ax)
+
+
+# In[152]:
+
+
+l = from_to('ap32a', 'ap32c')
+l = l[::-1]
+t=tabla_pond(l)
+fig, ax = plt.subplots(figsize=(10,6))
+barras_apiladas(t, ax)
+
+
+# In[157]:
+
+
+l = from_to('ap33a', 'ap33g')
+l = l[::-1]
+t=tabla_pond(l)
+fig, ax = plt.subplots(figsize=(10,10))
+barras_apiladas(t, ax)
+
+
+# In[158]:
+
+
+t = tabla_pond(['ap34a'])
+fig, ax = plt.subplots(figsize=(10,6))
+barras(t, ax) 
+
+
+# In[159]:
+
+
+t = tabla_pond(['ap34b'])
+fig, ax = plt.subplots(figsize=(10,6))
+barras(t, ax) 
+
+
+# In[160]:
+
+
+l = from_to('ap35a', 'ap35j')
+l = l[::-1]
+t=tabla_pond(l)
+fig, ax = plt.subplots(figsize=(12,10))
+barras_apiladas(t, ax)
+
+
+# In[161]:
+
+
+t = tabla_pond(['ap36'])
+fig, ax = plt.subplots(figsize=(10,6))
+barras(t, ax) 
+
+
+# In[162]:
+
+
+l = from_to('ap37a', 'ap37h')
+l = l[::-1]
+t=tabla_pond(l)
+fig, ax = plt.subplots(figsize=(10,10))
+barras_apiladas(t, ax)
+
+
+# In[164]:
+
+
+l = from_to('ap38', 'ap40')
+
+fig, axs = plt.subplots(len(l),1, sharex=True, figsize=(10,10))
+
+for i in range(len(l)):
+    barras(tabla_pond([l[i]]), axs[i])
+
+
+# In[165]:
+
+
+l = from_to('ap41', 'ap43')
+
+fig, axs = plt.subplots(len(l),1, sharex=True, figsize=(10,10))
+
+for i in range(len(l)):
+    barras(tabla_pond([l[i]]), axs[i])
+
+
+# In[168]:
+
+
+l = from_to('ap44a', 'ap44f')
+l = l[::-1]
+t=tabla_pond(l)
+fig, ax = plt.subplots(figsize=(10,10))
+barras_apiladas(t, ax)
+
+
+# In[169]:
+
+
+l = from_to('ap45a', 'ap45i')
+l = l[::-1]
+t=tabla_pond(l)
+fig, ax = plt.subplots(figsize=(10,10))
+barras_apiladas(t, ax)
+
+
+# In[177]:
+
+
+l = from_to('ap46a', 'ap46c')
+
+fig, axs = plt.subplots(len(l),1, sharex=True, figsize=(10,10))
+
+for i in range(len(l)):
+    barras(tabla_pond([l[i]]), axs[i])
+
+
+# In[178]:
+
+
+t = tabla_pond(['ap47'])
+fig, ax = plt.subplots(figsize=(10,6))
+barras(t, ax) 
+
+
+# In[179]:
+
+
+l = from_to('ap48a', 'ap48c')
+l = l[::-1]
+t=tabla_pond(l)
+fig, ax = plt.subplots(figsize=(10,10))
+barras_apiladas(t, ax)
+
+
+# In[180]:
+
+
+t = tabla_pond(['ap49'])
+fig, ax = plt.subplots(figsize=(10,6))
+barras(t, ax) 
+
+
+# In[218]:
+
+
 from pandas.api.types import CategoricalDtype
 c = CategoricalDtype(t.iloc[:,0].sort_values(ascending=False).index.values.tolist(), ordered=True)
 
@@ -303,3 +680,42 @@ t.index = t.index.astype(c)
 t.iloc[:,0].sort_values(ascending=False).index
 fig, ax = plt.subplots(figsize=(10,6))
 barras(t, ax) 
+
+
+# In[219]:
+
+
+t = tabla_pond(['sector'])
+fig, ax = plt.subplots(figsize=(10,6))
+barras(t, ax) 
+
+
+# In[220]:
+
+
+t = tabla_pond(['ambito'])
+fig, ax = plt.subplots(figsize=(10,6))
+barras(t, ax) 
+
+```
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
