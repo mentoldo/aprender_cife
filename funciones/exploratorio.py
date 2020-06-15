@@ -229,3 +229,11 @@ def barras_apiladas(t, ax, parse_labels=True):
     
     plt.tight_layout()
     plt.show()
+    
+
+def barras_apiladas_setiq(t, ax):
+    t.T.plot(kind='barh',
+             stacked=True,
+             ax=ax,
+             color=col_div(t).values,
+             legend=False)

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from funciones.manipular import etiquetas
 import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
 
 def barras(t, ax):
     t = t.sort_index(ascending=False)
