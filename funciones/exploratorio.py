@@ -89,6 +89,12 @@ def tabla(var, df=df, rel=True):
 def etiquetas(t):
     ''' Toma una tabla y busca las etiquetas para los códigos de columna y de valores.
     Devuelve una tupla con 2 DataFrames (colnames, valnames)
+    
+    Args:
+        Un DataFrame tabla() o tabla_pond()
+        
+    Returns:
+        Una tupla con dos DataFrames (colnames, valnames)
     '''
     import pandas as pd
     colnames = pd.Series(t.columns, index=t.columns).apply(col_lab)
@@ -189,6 +195,44 @@ def col_div(t):
     
     return color
 
+def crear_paleta(t, paleta, invertir=False):
+    '''Construye una paleta 'paleta' colocando grises en los valores negativos.
+    Args:    
+        t: tabla
+        paleta: Str. Un string correspondiente a los colormaps de Matplotlib
+    
+    Return:
+        Devuelve un DataFrame con un color para cada fila.'''
+    from matplotlib import cm
+    #from matplotlib.colors import ListedColormap, LinearSegmentedColormap
+    
+    colnames, valnames = etiquetas(t)
+    
+    ## Identificamos las categorías menores a cero
+    i = pd.Series(valnames.index.map(lambda x: int(x) < 0), dtype='bool')
+    
+    ## Evaluamos la cantidad de categorías por color
+    n_cat = (~i).sum()
+    #n_grey = i.sum()
+    
+    ## Seleccionamos los colores de las categorías color
+    cat = cm.get_cmap(paleta, 30)
+    
+    ## Creamos un np array con los colores
+    if invertir:
+        color = cat(np.linspace(10, 30, n_cat).astype(int))[::-1,:]
+    else:
+        color = cat(np.linspace(10, 30, n_cat).astype(int))
+    
+    color = pd.DataFrame(color,index=t.index[~i])
+    
+    ## Seleccionamos los colores de las categorías gris
+    gray = cm.get_cmap('Greys', 10)
+    
+    color = color.append(pd.DataFrame(gray([2,5,8]), index=t.index[i]))
+    
+    return color
+
 def barras_apiladas(t, ax, parse_labels=True):
     import textwrap
     import re
@@ -231,9 +275,9 @@ def barras_apiladas(t, ax, parse_labels=True):
     plt.show()
     
 
-def barras_apiladas_setiq(t, ax):
+def barras_apiladas_setiq(t, ax, color):
     t.T.plot(kind='barh',
              stacked=True,
              ax=ax,
-             color=col_div(t).values,
+             color=color,
              legend=False)
