@@ -164,7 +164,7 @@ def col_cat(t):
     
     return color
 
-def col_div(t):
+def col_div(t, invertir=True):
     '''Construye una paleta divergente de colores para graficar las tablas.
     Args:    
         t: tabla
@@ -186,7 +186,13 @@ def col_div(t):
     ## Seleccionamos los colores de las categorías color
     cat = cm.get_cmap('RdBu', 30)
     
-    color = pd.DataFrame(cat(np.linspace(3, 27, n_cat).astype(int)),index=t.index[~i])
+    ## Creamos un np array con los colores
+    if invertir:
+        color = cat(np.linspace(3, 27, n_cat).astype(int))[::-1,:]
+    else:
+        color = cat(np.linspace(3, 27, n_cat).astype(int))
+    
+    color = pd.DataFrame(color,index=t.index[~i])
     
     ## Seleccionamos los colores de las categorías gris
     gray = cm.get_cmap('Greys', 10)
@@ -281,3 +287,21 @@ def barras_apiladas_setiq(t, ax, color):
              ax=ax,
              color=color,
              legend=False)
+    
+def parse_ylab(colnames, parse=True, width=30):
+    import re
+    import textwrap
+    
+    if parse:
+        exp = re.compile('(?P<title>.*[…?])(?P<label>.*)')
+        colnames = colnames.str.extract(exp)
+    else:
+        colnames = pd.DataFrame(colnames, columns=['label'])
+        colnames['title'] = ''
+    # Agregamos breaklines para la visualización
+    colnames['label'] = colnames['label'].apply(lambda x: textwrap.fill(x, width=width))
+    return colnames
+
+def agregar_leyenda(ax, valnames):
+    ax.legend(valnames['Etiqueta.1'], loc='upper center', bbox_to_anchor=(0.5, -0.05),
+              shadow=False, ncol=len(valnames['Etiqueta.1']))
