@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from funciones.abrir_bases import cod_sec_2017
 import numpy as np
 
+
 df = pd.read_csv('./data/aprender2017-secundaria-12.csv', sep='\t', encoding='iso-8859-3', na_values=' ', dtype='object')
 
 ## Convertimos algunas variables a numéricas
@@ -135,6 +136,38 @@ def barras(t, ax):
     plt.tight_layout()
     plt.show()
 
+def barras_minimalista(t, ax):
+    t = t.sort_index(ascending=False)
+
+    colnames, valnames = etiquetas(t)
+    valnames = valnames.reindex(t.index)
+    
+    ## Construimos los colores
+    valnames['color'] = valnames.index.map(lambda x: int(x) < 0).map({False:'steelblue', True:'grey'})   
+    
+    ## Graficamos
+    t.iloc[:,0].plot(kind='barh',
+                     width=0.8,
+                     ax=ax,
+                     legend=False,
+                     color=valnames.color.values)
+    
+    ## Colocamos las etiquetas
+    ax.set_yticklabels(valnames['Etiqueta.1'])
+    ax.set_xticklabels('')
+    
+    ax.set(title=colnames[0],
+      ylabel='',
+      xlabel='Porcentaje de estudiantes',
+      xlim=(0,1))
+    # Hide the right and top spines
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+    ax.spines['bottom'].set_visible(False) 
+    ax.set_xticks([])
+   
+    anotar_porcentaje_barras(ax)
+
 def col_cat(t):
     '''Construye una paletta de colores para graficar las tablas.
     t: tabla
@@ -161,6 +194,33 @@ def col_cat(t):
     gray = cm.get_cmap('Greys', 10)
     
     color = color.append(pd.DataFrame(gray([2,5,8]), index=t.index[i]))
+    
+    return color
+
+def col_cat_val(v):
+    '''Construye una paletta de colores para graficar las tablas.
+    t: tabla
+    
+    # Values
+    Devuelve un DataFrame con un color para cada fila.'''
+    from matplotlib import cm
+    
+    ## Identificamos las categorías menores a cero
+    i = pd.Series(v.map(lambda x: int(x) < 0).values, index = v, dtype='bool')
+    
+    ## Evaluamos la cantidad de categorías por color
+    n_cat = (~i).sum()
+    #n_grey = i.sum()
+    
+    ## Seleccionamos los colores de las categorías color
+    cat = cm.get_cmap('tab10', 10)
+    
+    color = pd.DataFrame(cat(range(n_cat)),index=v[~i])
+    
+    ## Seleccionamos los colores de las categorías gris
+    gray = cm.get_cmap('Greys', 10)
+    
+    color = color.append(pd.DataFrame(gray([2,5,8]), index=v[i]))
     
     return color
 
@@ -302,6 +362,57 @@ def parse_ylab(colnames, parse=True, width=30):
     colnames['label'] = colnames['label'].apply(lambda x: textwrap.fill(x, width=width))
     return colnames
 
-def agregar_leyenda(ax, valnames):
-    ax.legend(valnames['Etiqueta.1'], loc='upper center', bbox_to_anchor=(0.5, -0.05),
-              shadow=False, ncol=len(valnames['Etiqueta.1']))
+    
+def anotar_porcentajes(ax):
+#    i = 1
+    for p in ax.patches:
+        width, height = p.get_width(), p.get_height()
+        x, y = p.get_xy()
+        if width < 0.01:
+            continue     
+        if width < 0.03:
+            size = 'x-small'
+            rot = 45
+            pos = y+ height+height*0.05
+            horizontalalignment='left'
+            verticalalignment='bottom'
+            xpos=x+width/8
+            
+        else: 
+            size = 'small'
+            rot = 'horizontal'
+            pos = y+ height+height*0.15
+            horizontalalignment='center'
+            verticalalignment='center'
+            xpos=x+width/2
+#       if width < 0.03:
+#            i = 1 - i
+#            pos = y+height +(1 - i)*(height*0.15)-i*(height+height*0.15)
+#        else:
+#            pos = y+ height+height*0.15
+            
+#        pos = y+ height+height*0.15
+        ax.text(xpos, 
+                pos, 
+                '{:.2f}%'.format(width*100), 
+                horizontalalignment=horizontalalignment, 
+                verticalalignment=verticalalignment,
+                fontsize=size,
+                rotation=rot)
+        
+def anotar_porcentaje_barras(ax):
+    for p in ax.patches:
+        width, height = p.get_width(), p.get_height()
+        x, y = p.get_xy()
+        if width < 0.01:
+            continue     
+        size = 10
+        rot = 'horizontal'
+        ax.text(x+width + 0.04, 
+                y+height/2, 
+                '{:.2f}%'.format(width*100), 
+                horizontalalignment='center', 
+                verticalalignment='center',
+                fontsize=size,
+                rotation=rot)
+        
