@@ -10,3 +10,9 @@ def cod_sec_2017():
     cod = cod.apply(lambda x: x.astype(str))
 
     return cod
+
+
+
+# cod = pd.read_excel('./docs/dicc_secundaria.xlsx', index=[0,1], dtype='object')
+
+# cod[['Variable', 'Etiqueta']] = cod[['Variable', 'Etiqueta']].ffill()
