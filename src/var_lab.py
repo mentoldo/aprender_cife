@@ -60,12 +60,11 @@ class VarEtiq():
             self.vals = None
             
     
-    
 class ValEtiq():
     '''Tiene información sobre las etiquetas de los valores de una variable'''
     def __init__(self, val_df, ordered=True):
         assert not val_df.empty, 'El DataFrame está vacío.'
-        assert list(val_df.columns) == ['val_code', 'val_name'], "df.columns no es ['var_code', 'var_name']"
+        assert list(val_df.columns) == ['val_code', 'val_name'], "df.columns no es ['val_code', 'val_name']"
         
         self.val_df = val_df[['val_code', 'val_name']]
         self.ordered = ordered
@@ -80,18 +79,111 @@ class ValEtiq():
         return self.val_df.set_index('val_code')['val_name'].to_dict()
     
     
+class Etiq():
+    '''Tiene información sobre las etiquetas'''
+    def __init__(self, cod):
+        di = _construct_VarEtiq(cod)
+        etiqs = {k: v for d in di for k, v in d.items()} 
+        self.var = etiqs
+        
+    
+    def _construct_VarEtiq(df):
+        grupos = iter(df.groupby('var_code'))
+    
+        def _get_attrib(x):
+            var_code = x[0]
+            var_name, df_cod = _extract_attrib(x[1])
+            return {var_code:VarEtiq(var_code, var_name, df_cod)}
 
-
+        return map(_get_attrib, grupos)
+    
+    def _extract_attrib(grupo):
+        '''
+        Extrae los atributos para pasar a var etiq
+        '''
+        val_name = grupo.var_name.iloc[0]
+        if len(grupo) > 1:    
+            df_cod = grupo[['val_code', 'val_name']].reset_index(drop=True)
+        else:
+            df_cod = None
+        return (val_name,
+                df_cod)
 #%%
+% timeit
+cod = prepr_code('./docs/dicc_secundaria.xlsx')
+e = Etiq(cod)
+#%%
+from src.preprocesing import prepr_code
+%% timeit
+cod = prepr_code('./docs/dicc_secundaria.xlsx')
+e = Etiq(cod)
+type(e)
+e.var['ICSE'].vals.val_df
+
+
+grupos = df.groupby('var_code')
+df.iloc[grupos.groups['ICSE']]
+grupo = cod[cod.var_code == 'ICSE']
+dir(grupos)
+grupos.var
+
+
+var_name, df_cod = extract_attrib(grupo)
+
+def 
+
+def extract_attrib(grupo):
+    '''
+    Extrae los atributos para pasar a var etiq
+    '''
+    val_name = grupo.var_name.iloc[0]
+    if len(grupo) > 1:    
+        df_cod = grupo[['val_code', 'val_name']].reset_index(drop=True)
+    else: df_cod = None
+    return (val_name,
+            df_cod)
+
+
+def _construct_VarEtiq(df):
+    grupos = iter(df.groupby('var_code'))
+
+    def _get_attrib(x):
+        var_code = x[0]
+        var_name, df_cod = extract_attrib(x[1])
+        return {var_code:VarEtiq(var_code, var_name, df_cod)}
+    
+    return map(_get_attrib, grupos)
+    
+    
+di = _construct_VarEtiq(cod)
+etiqs = {k: v for d in di for k, v in d.items()}
+
+etiqs['autoconmatematicam'].vals.val_codes()
+
+
+
+
+dict(list(d))
+{d.items() for d in list(d)}
+
+next(d).items()
+{d.items() for d in d}
+dict(d)
+
+
+var = VarEtiq(grupo.var_code.iloc[0], grupo.val_name.iloc[0], grupo[['val_code', 'val_name']])
+
+
+
 c = cod.loc['ap36'].reset_index()
 c.columns = ['var_code', 'var_name', 'val_code', 'val_name']
 val_df = c.reset_index()[['val_code', 'val_name']]
 
-
+cod = cod.reset_index()
 cod.columns = ['var_code', 'var_name', 'val_code', 'val_name']
 grupos = iter(cod.groupby('var_code'))
 
-pd.concat(map(lambda x: remove_nans(x[1]), grupos)).sort_index().reset_index(drop=True)
+cod = pd.concat(map(lambda x: remove_nans(x[1]), grupos)).sort_index().reset_index(drop=True)
 
 cod.groupby('var_code').apply(lambda x: x[~x['val_code'].isna()]).index
 
@@ -101,6 +193,12 @@ grupo = cod[cod.var_code == 'ICSE']
 grupo.loc[~grupo[['val_code', 'val_name']].isna().any(axis=1), ['var_name', 'val_code', 'val_name']]
 
 def remove_nans(df):
+    '''Remueve las filas con valores faltantes para df. df es una tabla con códigos con
+    las siguientes columnas ['var_code', 'var_name', 'val_code', 'val_name']
+    
+    Args
+        df(pdDataFrame): pd.DataFrame con df.columns == ['var_code', 'var_name', 'val_code', 'val_name']
+    '''  
     ## Si la variable es numérica, retornamos el df
     if len(df) == 1:
         return df
@@ -110,6 +208,9 @@ def remove_nans(df):
 grupo[~grupo[['val_code', 'val_name']].isna().any(axis=1)].join(cod[['var_name']])
 cod.groupby('var_code')
 
+var = VarEtiq(grupo.var_code.iloc[0], grupo.val_name.iloc[0], grupo[['val_code', 'val_name']])
+
+var.vals.val_codes()
 
 ValEtiq(val_df).val_names()
 ValEtiq(val_df).val_codes()
