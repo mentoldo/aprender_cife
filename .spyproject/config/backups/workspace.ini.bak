@@ -6,5 +6,5 @@ save_non_project_files = False
 
 [main]
 version = 0.2.0
-recent_files = ['README.md', 'descriptivo_raw.py', 'descriptivo_raw2.py', 'funciones/graficas.py', 'barras_apiladas_sns.py', 'cruces_demandas_estudiantes_raw.py', 'disconformidad_raw.py', 'funciones/abrir_bases.py', 'descriptivo_cruces_raw.py', 'src/var_lab.py', 'src/var_info.py', 'src/preprocesing.py']
+recent_files = ['README.md', 'src/preprocesing.py', 'funciones/manipular.py', '../../Documentos/proyectos/aprender_cife/funciones/abrir_bases.py', '../../Documentos/proyectos/aprender_cife/src/var_lab.py', '../../Documentos/proyectos/aprender_cife/disconformidad_raw.py', '../../Documentos/proyectos/aprender_cife/raw/correlaciones.py', '../../Documentos/proyectos/aprender_cife/funciones/exploratorio.py', '../../Documentos/proyectos/aprender_cife/src/abrir_etiquetas.py']
 

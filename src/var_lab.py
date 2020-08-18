@@ -4,51 +4,6 @@ import pandas as pd
 
 class VarEtiq():
     '''
-    Ordena información de etiquetado de una variable.
-    
-    Args:
-        df (DataFrame): DataFrame con las columnas ['var_code', 'var_name', 'val_code', 'val_name']
-    
-    Attributes:
-        var_name (str): Nombre de la variable
-        val_cod (pd.Categorical): Códigos de la variable
-        val_items (:obj:'list'): Lista de tuplas
-    
-    '''
-    
-    def __init__(self, df, ordered=True):
-        assert not df.empty, 'El DataFrame está vacío.'
-        assert list(df.columns) == ['var_code', 'var_name', 'val_code', 'val_name'],\
-            "df.columns no es ['var_code', 'var_name', 'val_code', 'val_name']"
-        
-        self.var_code = df['var_code'].unique()[0]
-        self.var_name = df['var_name'].unique()[0]
-        self.ordered = ordered
-        self.df = df[['val_code', 'val_name']]
-        
-        ## Determinamos si se trata de una variable etiquetada.
-        if df.shape[0] == 1:
-            self.labeled = False
-        else:
-            self.labeled = True
-    
-    def val_codes(self):
-        if self.labeled:
-            res = CategoricalDtype(categories=self.df.val_code, ordered=self.ordered)
-        else:
-            res = None
-        return res
-    
-    def val_names(self):
-        if self.labeled:
-            res = CategoricalDtype(categories=self.df.val_name, ordered=self.ordered)
-        else:
-            res = None
-        return res
-#%%
-
-class VarEtiq():
-    '''
     Ordena información de etiquetado de una variable.    
     '''   
     def __init__(self, var_code, var_name, val_df, ordered=True):
@@ -82,22 +37,22 @@ class ValEtiq():
 class Etiq():
     '''Tiene información sobre las etiquetas'''
     def __init__(self, cod):
-        di = _construct_VarEtiq(cod)
+        di = self._construct_VarEtiq(cod)
         etiqs = {k: v for d in di for k, v in d.items()} 
         self.var = etiqs
         
     
-    def _construct_VarEtiq(df):
+    def _construct_VarEtiq(self, df):
         grupos = iter(df.groupby('var_code'))
     
         def _get_attrib(x):
             var_code = x[0]
-            var_name, df_cod = _extract_attrib(x[1])
+            var_name, df_cod = self._extract_attrib(x[1])
             return {var_code:VarEtiq(var_code, var_name, df_cod)}
 
         return map(_get_attrib, grupos)
     
-    def _extract_attrib(grupo):
+    def _extract_attrib(self, grupo):
         '''
         Extrae los atributos para pasar a var etiq
         '''
@@ -109,162 +64,12 @@ class Etiq():
         return (val_name,
                 df_cod)
 #%%
-% timeit
-cod = prepr_code('./docs/dicc_secundaria.xlsx')
-e = Etiq(cod)
-#%%
-from src.preprocesing import prepr_code
-%% timeit
-cod = prepr_code('./docs/dicc_secundaria.xlsx')
-e = Etiq(cod)
-type(e)
-e.var['ICSE'].vals.val_df
+# from src.preprocesing import prepr_code
+# cod = prepr_code('./docs/dicc_secundaria.xlsx')
+# e = Etiq(cod)
+# #%%
 
-
-grupos = df.groupby('var_code')
-df.iloc[grupos.groups['ICSE']]
-grupo = cod[cod.var_code == 'ICSE']
-dir(grupos)
-grupos.var
-
-
-var_name, df_cod = extract_attrib(grupo)
-
-def 
-
-def extract_attrib(grupo):
-    '''
-    Extrae los atributos para pasar a var etiq
-    '''
-    val_name = grupo.var_name.iloc[0]
-    if len(grupo) > 1:    
-        df_cod = grupo[['val_code', 'val_name']].reset_index(drop=True)
-    else: df_cod = None
-    return (val_name,
-            df_cod)
-
-
-def _construct_VarEtiq(df):
-    grupos = iter(df.groupby('var_code'))
-
-    def _get_attrib(x):
-        var_code = x[0]
-        var_name, df_cod = extract_attrib(x[1])
-        return {var_code:VarEtiq(var_code, var_name, df_cod)}
-    
-    return map(_get_attrib, grupos)
-    
-    
-di = _construct_VarEtiq(cod)
-etiqs = {k: v for d in di for k, v in d.items()}
-
-etiqs['autoconmatematicam'].vals.val_codes()
-
-
-
-
-dict(list(d))
-{d.items() for d in list(d)}
-
-next(d).items()
-{d.items() for d in d}
-dict(d)
-
-
-var = VarEtiq(grupo.var_code.iloc[0], grupo.val_name.iloc[0], grupo[['val_code', 'val_name']])
-
-
-
-c = cod.loc['ap36'].reset_index()
-c.columns = ['var_code', 'var_name', 'val_code', 'val_name']
-val_df = c.reset_index()[['val_code', 'val_name']]
-
-cod = cod.reset_index()
-cod.columns = ['var_code', 'var_name', 'val_code', 'val_name']
-grupos = iter(cod.groupby('var_code'))
-
-cod = pd.concat(map(lambda x: remove_nans(x[1]), grupos)).sort_index().reset_index(drop=True)
-
-cod.groupby('var_code').apply(lambda x: x[~x['val_code'].isna()]).index
-
-cod.groupby('var_code').apply(remove_nans).reset_index(0, drop=True).sort_index().reset_index(drop=True)
-cod.groupby('var_code').get_group('ICSE')
-grupo = cod[cod.var_code == 'ICSE']
-grupo.loc[~grupo[['val_code', 'val_name']].isna().any(axis=1), ['var_name', 'val_code', 'val_name']]
-
-def remove_nans(df):
-    '''Remueve las filas con valores faltantes para df. df es una tabla con códigos con
-    las siguientes columnas ['var_code', 'var_name', 'val_code', 'val_name']
-    
-    Args
-        df(pdDataFrame): pd.DataFrame con df.columns == ['var_code', 'var_name', 'val_code', 'val_name']
-    '''  
-    ## Si la variable es numérica, retornamos el df
-    if len(df) == 1:
-        return df
-    return df[~df[['val_code', 'val_name']].isna().any(axis=1)]
-
-
-grupo[~grupo[['val_code', 'val_name']].isna().any(axis=1)].join(cod[['var_name']])
-cod.groupby('var_code')
-
-var = VarEtiq(grupo.var_code.iloc[0], grupo.val_name.iloc[0], grupo[['val_code', 'val_name']])
-
-var.vals.val_codes()
-
-ValEtiq(val_df).val_names()
-ValEtiq(val_df).val_codes()
-
-ValEtiq(val_df).val_dict()
-class VarNoEtiq():
-
-cod = cod.reset_index()
-cod.columns = ['var_code', 'var_name', 'val_code', 'val_name']
-var = cod.groupby('var_code').apply(VarEtiq)
-groups = cod.groupby('var_code')
-c = cod.iloc[cod.groupby('var_code').groups['TEL']]
-
-cod.groupby('var_code').apply(ValEtiq)
-
-var['ICSE'].val_codes()
-apply(ValEtiq, )        
-    
-cod.loc['ap36',['Etiqueta.1', 'Códigos']].reset_index(drop=True).set_index('Códigos')['Etiqueta.1'].to_dict()
-
-cod.loc['ap36'].reset_index().Variable.unique()[0]
-
-c = cod.loc['ap36'].reset_index()
-c.columns = ['var_code', 'var_name', 'val_code', 'val_name']
-
-c.var_code.unique()[0]
-
-pd
-pd.Categorical(c.val_code, ordered=True, categories=c.val_code)
-
-
-c.columns = ['var_code', 'var_name', 'val_code', 'val_names']
-var = VarEtiq(c)
-ValEtiq(pd.DataFrame())
-
-
-var.val_names()
-var.val_codes
-var.df
-VarEtiq()
-
-
-pd.Categorical(c.val_code, ordered=True, categories=c.val_code)
-pd.Categorical()
-
-from pandas.api.types import CategoricalDtype
-cat = CategoricalDtype(categories=['a', 'b', 'c'])
-cat.add_categories([3])
-c.empty
-
-pd.DataFrame(columns=['a', 'b'])
-
-df1 = pd.DataFrame({'grupo':['a','b'], 'values':[1,2]})
-df1 = pd.DataFrame({'grupo':['a','b', 'a'], 'values':[1,2,3]})
-df1.groupby('grupo').apply(lambda x: x.iloc[x.values==1,])
-
-df1 = pd.DataFrame({'grupo':['a','b', None], 'values':[None,2,3]})
+# cod = prepr_code('./docs/dicc_secundaria.xlsx')
+# e = Etiq(cod)
+# type(e)
+# e.var['ap3a'].vals.val_dict()
