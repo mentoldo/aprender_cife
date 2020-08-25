@@ -15,3 +15,8 @@ una carrera universitaria
 
 * disconformidad vs. interés
 * Pensás que las evaluaciones que te hacen tus profesores te sirven para mejorar tu aprendizaje?
+
+
+## Artículos de interés
+
+* https://chequeado.com/el-explicador/aprender-2016-que-relacion-hay-entre-el-nivel-socioeconomico-del-alumno-y-que-vaya-a-una-escuela-publica-o-privada/
