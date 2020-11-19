@@ -31,4 +31,5 @@ if (!dir.exists('docs')) {
     
     lapply(files, function(x){download.file(x[2], paste("./docs/", x[1], ".pdf", sep = ""))})
 }
+
     
