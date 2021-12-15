@@ -73,3 +73,4 @@ class Etiq():
 # e = Etiq(cod)
 # type(e)
 # e.var['ap3a'].vals.val_dict()
+# e.var['ap3a'].vals.val_df

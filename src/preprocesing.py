@@ -36,7 +36,7 @@ def abrir_cod(file):
     cod : pd.DataFrame
         df con los códigos.
     '''  
-    cod = pd.read_excel(file, index=[0,1], dtype='object')
+    cod = pd.read_excel(file, dtype='object')
     return cod
 
 def change_col_names(df):
